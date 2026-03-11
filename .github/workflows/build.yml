@@ -1,0 +1,30 @@
+name: Build ZeroClaw for GCP VM
+
+on:
+  workflow_dispatch: # This line creates a manual "Run" button in the GitHub UI
+
+jobs:
+  build-and-package:
+    runs-on: ubuntu-latest # This gives you a free, powerful 7GB RAM server
+    
+    steps:
+      - name: Checkout Source Code
+        uses: actions/checkout@v4
+        
+      - name: Install Rust Toolchain
+        uses: dtolnay/rust-toolchain@stable
+        
+      - name: Apply Dashboard Bug Fix
+        run: |
+          mkdir -p web/dist
+          echo '<!DOCTYPE html><html><body><h1>Dashboard not built</h1></body></html>' > web/dist/index.html
+          
+      - name: Compile ZeroClaw (Release Mode)
+        run: cargo build --release
+        
+      - name: Upload Compiled Binary
+        uses: actions/upload-artifact@v4
+        with:
+          name: zeroclaw-linux-amd64
+          path: target/release/zeroclaw
+          retention-days: 7
